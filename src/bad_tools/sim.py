@@ -48,6 +48,14 @@ class DetectorBase(Device):
         self._func = func
         super().__init__(*args, **kwargs)
 
+    @property
+    def channels(self):
+        return [
+            getattr(self, k)
+            for k in self.component_names
+            if isinstance(getattr(self, k), Crystal)
+        ]
+
 
 def make_detector(
     angle_offsets: Sequence[float],
