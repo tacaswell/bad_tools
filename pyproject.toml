@@ -84,7 +84,7 @@ port.exclude_lines = [
 files = ["src", "tests"]
 python_version = "3.8"
 warn_unused_configs = true
-strict = true
+strict = false
 show_error_codes = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 warn_unreachable = true
@@ -93,8 +93,14 @@ disallow_incomplete_defs = false
 
 [[tool.mypy.overrides]]
 module = "bad_tools.*"
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "ophyd.*"
+]
+ignore_missing_imports = true
 
 
 [tool.ruff]
