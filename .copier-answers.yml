@@ -1,0 +1,12 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 2023.09.21
+_src_path: gh:scientific-python/cookie
+backend: setuptools621
+email: tcaswell@bnl.gov
+full_name: Thomas A Caswell
+license: BSD
+org: tacaswell
+project_name: bad_tools
+project_short_description: Tools for the BAD beamline as part of NEXT-III at NSLS-II.
+url: https://github.com/tacaswell/bad_tools
+vcs: true
