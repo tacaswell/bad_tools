@@ -1,6 +1,8 @@
 from typing import Callable
 from collections.abc import Sequence
 
+import numpy as np
+
 from ophyd.signal import DerivedSignal, Signal
 from ophyd import Device, Component as _Cpt
 
@@ -23,8 +25,9 @@ class CrystalChannel(GrandDerivedSignal):
     def inverse(self, value: float) -> float:
         func = self.parent.parent._func
         offset = self.parent.offset.get()
+        missalign = np.abs(np.clip(self.parent.missalign.get(), -1, 1))
 
-        return func(value + offset)
+        return func(value + offset) * (1 - missalign)
 
 
 class Crystal(Device):
@@ -34,6 +37,7 @@ class Crystal(Device):
 
     offset = _Cpt(Signal, kind="config")
     value = _Cpt(CrystalChannel, "angle", kind="hinted", lazy=True, name="")
+    missalign = _Cpt(Signal, kind="config", value=0.5)
 
     def __init__(self, *args, offset, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,7 +56,7 @@ class DetectorBase(Device):
     def channels(self):
         return [
             getattr(self, k)
-            for k in self.component_names
+            for k in sorted(self.component_names)
             if isinstance(getattr(self, k), Crystal)
         ]
 
