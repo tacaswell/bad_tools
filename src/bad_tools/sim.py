@@ -1,10 +1,12 @@
-from typing import Callable
+from typing import Callable, Tuple
 from collections.abc import Sequence
 
 import numpy as np
+import numpy.typing
 
 from ophyd.signal import DerivedSignal, Signal
 from ophyd import Device, Component as _Cpt
+from ophyd.sim import SynAxis, SynSignal
 
 
 class GrandDerivedSignal(DerivedSignal):
@@ -76,3 +78,27 @@ def make_detector(
         },
     )
     return cls(name=name, func=func)
+
+
+def make_sample_rack(
+    centers: np.typing.NDArray,
+    heights: np.typing.NDArray,
+) -> Tuple[Device, Device, Device]:
+    x_mtr = SynAxis(name="x")
+    y_mtr = SynAxis(name="y")
+    N = len(centers)
+    locs = np.arange(1, N * 2 + 1, 2)
+    tops = centers + (heights / 2.0)
+    bottoms = centers - (heights / 2.0)
+
+    def local():
+        x = x_mtr.readback.get()
+        y = y_mtr.readback.get()
+
+        return np.sum(
+            np.exp(-(((x - locs) / 0.5) ** 2) / 2) * (y < tops) * (y > bottoms)
+        )
+
+    signal = SynSignal(local, name="det_total")
+
+    return x_mtr, y_mtr, signal
