@@ -40,7 +40,6 @@
       cyrstal_offset_index = np.searchsorted(th, primary.bank.offset)
 
       if primary.number > 1:
-
           if (primary.offset - primary.bank.solid_angle) < primary.bank.offset:
               raise Exception("not sure this is practical, not modeled yet")
 
@@ -109,7 +108,6 @@
       max_measure=120,
       N_measure=512,
   ):
-
       if primary.number > 1:
           if (primary.offset - primary.bank.solid_angle) < primary.bank.offset:
               raise Exception("not sure this is practical, not modeled yet")
@@ -136,7 +134,7 @@
 
 
   def plot3(det, ax=None):
-      img, extent = measure_khymo(det, 20, N_measure=1024*2)
+      img, extent = measure_khymo(det, 20, N_measure=1024 * 2)
       if ax is None:
           fig, ax = plt.subplots(layout="constrained", figsize=(4, 3))
       else:
@@ -147,11 +145,11 @@
           img,
           extent=extent,
           origin="lower",
-          vmin=.5,
+          vmin=0.5,
           cmap=cm,
           aspect="auto",
           interpolation_stage="rgba",
-          vmax=10.5
+          vmax=10.5,
       )
       fig.colorbar(im, label="crystal passes", extend="min")
       ax.set_xlabel("measured angle [deg]")
@@ -170,14 +168,34 @@
       wedge_kwargs = {"center": (0, 0), "r": 0.9, "width": 0.5, "alpha": 0.5}
       cmap = matplotlib.colormaps["tab10"]
 
+      target = 100
+      min_range = min_to_theta(det, target)
+      target_time = 30
+      A = 1e-4
+      rate = min_range / target_time
+      speed = 2000 * A  # deg /s
+
       for n, color in enumerate(cmap(np.linspace(0, 1, det.number))):
-          w = Wedge(
-              theta1=(det.offset * (n)),
-              theta2=(det.bank.solid_angle + det.offset * (n)),
-              ,**wedge_kwargs,
-              color=color,
+          ax.add_artist(
+              Wedge(
+                  theta1=(det.offset * (n)),
+                  theta2=(det.bank.solid_angle + det.offset * (n)),
+                  ,**wedge_kwargs,
+                  color=color,
+              )
           )
-          ax.add_artist(w)
+
+          ax.add_artist(
+              Wedge(
+                  theta1=(det.offset * (n)) + min_range,
+                  theta2=(det.bank.solid_angle + det.offset * (n)) + min_range,
+                  center=(0, 0),
+                  r=0.39,
+                  width=0.075,
+                  color=color,
+                  alpha=0.3,
+              )
+          )
 
           base_th = det.offset * n
           for m in range(det.bank.number):
@@ -213,18 +231,18 @@
           va="top",
           ha="right",
       )
-      target = 100
-      min_range = min_to_theta(det, target)
 
-      # w = Wedge(
-      #     center=(0, 0),
-      #         theta1=0,
-      #         theta2=min_range,
-      #         color='.5',
-      #         r=wedge_kwargs['r'] - wedge_kwargs['width'] - .1,
-      #         width=.1,
-      #
-      #     )
+      ax.add_artist(
+          Wedge(
+              center=(0, 0),
+              theta1=0,
+              theta2=min_range,
+              color=".5",
+              r=.39,
+              width=0.075,
+
+          )
+      )
       # ax.add_artist(w)
       # w = Wedge(
       #     center=(0, 0),
@@ -235,10 +253,7 @@
       #         width=.1,
       #     )
       # ax.add_artist(w)
-      target_time = 30
-      A = 1e-4
-      rate = min_range / target_time
-      speed = 2000 * A  # deg /s
+
       ax.annotate(
           "\n".join(
               [
@@ -256,6 +271,47 @@
       )
 
 
+  def min_to_theta(det, target):
+      out, th = angle_to_measure(det, 150, N=1024 * 4)
+      return th[np.searchsorted(out, target)]
+#+end_src
+
+#+begin_src python
+  layouts = [
+      Primary(Bank(13, 2), 1, 0),
+      Primary(Bank(13, 2), 3, 33),
+      Primary(Bank(4, 2), 7, 14.5),
+      Primary(Bank(34, 3), 1, 0),
+  ]
+#+end_src
+
+** 4 panel
+#+begin_src python
+  outer_fig = plt.figure(layout="constrained", figsize=(7, 7))
+  fig_arr = outer_fig.subfigures(2, 2, hspace=0, wspace=0)
+
+  for fig, det, label in zip(fig_arr.flat, layouts, "ABCD"):
+      ax = fig.subplots()
+      plot_layout(det, ax=ax)
+      fig.patch.set_linewidth(2)
+      fig.patch.set_edgecolor("k")
+      ax.annotate(
+          rf"\textbf{{{label}}}",
+          (1, 0),
+          xytext=(-5, 5),
+          xycoords="subfigure fraction",
+          textcoords="offset points",
+          usetex=True,
+          ha="right",
+      )
+
+  plt.show()
+  outer_fig.savefig('/tmp/layout_panels.png', dpi=300)
+#+end_src
+
+** lots of diagram
+
+#+begin_src python
   def make_figure(det):
       fig, (ax1, ax2) = plt.subplots(1, 2, layout="constrained", figsize=(7, 3.6))
       plot_layout(det, ax=ax1)
@@ -264,15 +320,16 @@
       return fig
 
 
-  def min_to_theta(det, target):
-      out, th = angle_to_measure(det, 150, N=1024 * 4)
-      return th[np.searchsorted(out, target)]
-
-
-  make_figure(Primary(Bank(4, 2), 7, 14.5)).savefig("/tmp/seven_bank.png", dpi=300)
-  make_figure(Primary(Bank(13, 2), 3, 33)).savefig("/tmp/three_bank.png", dpi=300)
-  make_figure(Primary(Bank(13, 2), 1, 0)).savefig("/tmp/single_bank.png", dpi=300)
-  make_figure(Primary(Bank(34, 3), 1, 0)).savefig("/tmp/bicyle_wheel.png", dpi=300)
+  for det, pth in zip(
+      layouts,
+      [
+          "/tmp/seven_bank.png",
+          "/tmp/three_bank.png",
+          "/tmp/single_bank.png",
+          "/tmp/bicyle_wheel.png",
+      ],
+  ):
+      make_figure(det).savefig(pth, dpi=300)
 
 
   plt.show()
