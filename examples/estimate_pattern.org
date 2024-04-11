@@ -1,0 +1,68 @@
+* "Simulate" patterns
+
+#+begin_src python
+  import numpy as np
+  import pandas as pd
+  fname = '/home/tcaswell/Downloads/11bmb_7871_Y1.fxye'
+
+  df = pd.read_csv(fname, skiprows=26, names=['theta', 'I1', 'I0'], sep=' ', skipinitialspace=True, index_col=False)
+
+  I_cumsum = (df.I1 / df.I1.sum()).cumsum()
+
+  def gen_pattern(th, i_cs, N):
+      counts, bins = np.histogram(th[np.searchsorted(I_cumsum, np.random.rand(N))], bins=th, density=True)
+      return th[:-1], counts
+
+
+
+  def make_plot(df, n_samples, *, ax=None, offset=.001):
+      I_cumsum = (df.I1 / df.I1.sum()).cumsum()
+
+      fig, ax = plt.subplots()
+
+      ax.plot(df.theta, df.I1/(df.I1.sum()*np.mean(np.diff(df.theta))), zorder=10, color='k', lw=3, label='truth')
+      for j, n in enumerate(n_samples, start=1):
+          x, y = gen_pattern(df.theta, I_cumsum, n)
+          ax.plot(x, y+offset*j, label=f'{n:,} photons')
+      ax.legend()
+#+end_src
+
+* estimate speeds
+#+begin_src python
+  from dataclasses import dataclass
+  import numpy as np
+  from matplotlib.ticker import EngFormatter
+
+  @dataclass
+  class ScanStats:
+      arm_length : float
+      scan_range : float
+      resolution : float
+
+      tip_speed : float
+      min_frame_rate : float
+
+      def __str__(self):
+          fmt = EngFormatter(unit='Hz', places=1)
+
+          return '\n'.join((
+
+          f"{self.arm_length}m arm | {self.scan_range}° scan range | Δ{self.resolution:.1e}° resolution",
+
+          f" {self.tip_speed:.2g} m/s tip speed",
+          f" {fmt(self.min_frame_rate)} minimum frame rate"))
+
+
+  def fun(arm_length, angular_range, angular_resolution, scan_time):
+      range_rad = np.deg2rad(angular_range)
+      resolution_rad = np.deg2rad(angular_resolution)
+
+      motion_distance = range_rad * arm_length
+
+      tip_speed = motion_distance / scan_time
+      min_frame_rate = (range_rad / resolution_rad) / scan_time
+
+      return ScanStats(arm_length, angular_range, angular_resolution, tip_speed, min_frame_rate)
+
+
+#+end_src

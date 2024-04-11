@@ -1,0 +1,89 @@
+#+begin_src python
+
+  import h5py
+  def h5_tree(val, pre=''):
+
+      items = len(val)
+      for key, val in val.items():
+          items -= 1
+          if items == 0:
+              # the last item
+              if type(val) == h5py.Group:
+                  print(pre + '└── ' + key)
+                  h5_tree(val, pre+'    ')
+              else:
+                  print(pre + '└── ' + key + f' {val.shape} {val.dtype}')
+          else:
+              if type(val) == h5py.Group:
+                  print(pre + '├── ' + key)
+                  h5_tree(val, pre+'│   ')
+              else:
+                  print(pre + '├── ' + key + f' {val.shape} {val.dtype}')
+#+end_src
+#+begin_src python
+  import numpy as np
+  import h5py
+  f = '/mnt/store/bnl/cache/hrd/Si_35keV_081221_roicoll_0001.h5'
+  with h5py.File(f) as F:
+      d = F['1.1/instrument/eiger_roi_collection/data']
+      dr = d.astype(np.uint8)[:].reshape(-1, 13, 512)
+      tth = F['1.1/instrument/positioners/tth'][:]
+      del d
+
+  f = '/mnt/store/bnl/cache/hrd/Si_35keV_081221_roicoll_0001_rebin.h5'
+  with h5py.File(f) as F:
+      rebined = F['entry_0000/id22rebin/data/I_sum'][:]
+      r_tth = F['entry_0000/id22rebin/data/2th'][:]
+      th_offset = np.rad2deg(F['entry_0000/id22rebin/topas/offset'][:])
+#+end_src
+
+#+begin_src python
+  import os
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+  def test(d, tth, rebinned_I, rebinned_tth, th_offset, starta, stopa, roi=0, fig=None, show_correct=False):
+      start = np.searchsorted(tth, starta)
+      stop = np.searchsorted(tth, stopa)
+      if stop == len(tth):
+          stop = -1
+      if fig is None:
+          fig = plt.figure(figsize=(9, 4.5), constrained_layout=True)
+
+      (ax2, ax1) = fig.subplots(1, 2, sharey=True, width_ratios=[1, 5])
+      fig.suptitle(f'ROI {roi}')
+      ax2.set_ylabel('arm position (°)')
+      ax2.set_xlabel('row sum')
+      ax1.set_xlabel('detector column')
+      print(f'{start=} {stop=}')
+      sub = d[start:stop, roi, :]
+      ax2.plot(sub.sum(axis=1), tth[start:stop])
+      if show_correct:
+          ax2.plot(rebinned_I[roi], rebinned_tth - th_offset[roi])
+      cmap = plt.get_cmap('viridis')
+      cmap.set_under('w', alpha=0)
+      im = ax1.imshow(sub, extent=(0, sub.shape[-1], tth[start], tth[stop]), aspect='auto', vmin=1, vmax=np.max(sub), cmap=cmap, origin='lower')
+      fig.colorbar(im, use_gridspec=True, extend='min', label='photon count')
+      print(f'{np.min(sub)=}, {np.max(sub)=}')
+      return fig
+
+
+  #test(dr, tth, 16test(dr, tth, 0, 40, roi=0)9700, 171300, roi=0)
+  test(dr, tth, rebined, r_tth, th_offset, -10, 40, roi=0).savefig(os.path.expanduser('~/windows_bridge/esrf_a.png'))
+  test(dr, tth, rebined, r_tth, th_offset, 18, 19, roi=0).savefig(os.path.expanduser('~/windows_bridge/esrf_b.png'))
+  test(dr, tth, rebined, r_tth, th_offset, 18.3, 18.5, roi=0).savefig(os.path.expanduser('~/windows_bridge/esrf_c.png'))
+  test(dr, tth, rebined, r_tth, th_offset, 18.46, 18.49, roi=0).savefig(os.path.expanduser('~/windows_bridge/esrf_d.png'))
+
+
+
+  # test(dr, tth, -10, 40, roi=0)
+
+
+#+end_src
+
+#+begin_src python
+
+  fig, ax = plt.subplots()
+  for j, i in enumerate(rebined):
+      ax.plot(r_tth, i + j)
+#+end_src
