@@ -222,7 +222,7 @@
           va="top",
       )
       ax.annotate(
-          "\n".join([f"Total Cyrstals: {det.number*det.bank.number}"]),
+          "\n".join([f"Total Crystals: {det.number*det.bank.number}"]),
           (1, 1),
           xycoords="axes fraction",
           xytext=(0, 15),

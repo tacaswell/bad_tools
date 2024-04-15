@@ -1,9 +1,10 @@
-import numpy as np
-import matplotlib.pyplot as plt
+from __future__ import annotations
 
+import bluesky.plans as bp
+import matplotlib.pyplot as plt
+import numpy as np
 from bluesky import RunEngine
 from bluesky.callbacks.best_effort import BestEffortCallback
-import bluesky.plans as bp
 
 from bad_tools.sim import make_detector
 

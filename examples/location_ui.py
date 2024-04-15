@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from random import randint
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from bad_tools.search import Sample, SampleLocation, SampleViz, LocRange
+from bad_tools.search import LocRange, Sample, SampleLocation, SampleViz
 
 N = 15
 

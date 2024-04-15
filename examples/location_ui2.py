@@ -1,10 +1,11 @@
+from __future__ import annotations
+
+import bluesky.plans as bp
 import numpy as np
-
-from bad_tools.sim import make_sample_rack
-
 from bluesky import RunEngine
 from bluesky.callbacks.best_effort import BestEffortCallback
-import bluesky.plans as bp
+
+from bad_tools.sim import make_sample_rack
 
 bec = BestEffortCallback()
 bec.disable_table()
