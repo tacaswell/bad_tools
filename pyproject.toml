@@ -27,7 +27,7 @@ classifiers = [
   "Typing :: Typed",
 ]
 dynamic = ["version"]
-dependencies = []
+dependencies = ["ophyd", "bluesky", "numpy", "matplotlib"]
 
 [project.optional-dependencies]
 test = [
