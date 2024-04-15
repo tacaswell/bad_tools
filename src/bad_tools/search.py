@@ -1,16 +1,17 @@
-from typing import Any, Dict
+from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
+import matplotlib.colors as mpcolours
 from matplotlib.patches import Rectangle
 from matplotlib.text import Annotation
-import matplotlib.colors as mpcolours
 
 
 @dataclass
 class Sample:
     name: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass

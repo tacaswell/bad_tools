@@ -9,9 +9,9 @@ import bluesky.plans as bp
 bec = BestEffortCallback()
 bec.disable_table()
 
-x, y, det = make_sample_rack(3*np.random.randn(15) + 13, 5)
+x, y, det = make_sample_rack(3 * np.random.randn(15) + 13, 5)
 
-det.kind = 'hinted'
+det.kind = "hinted"
 
 RE = RunEngine()
 RE.subscribe(bec)

@@ -1,11 +1,12 @@
-from typing import Callable, Tuple
-from collections.abc import Sequence
+from __future__ import annotations
+
+from collections.abc import Callable, Sequence
 
 import numpy as np
 import numpy.typing
-
+from ophyd import Component as _Cpt
+from ophyd import Device
 from ophyd.signal import DerivedSignal, Signal
-from ophyd import Device, Component as _Cpt
 from ophyd.sim import SynAxis, SynSignal
 
 
@@ -17,7 +18,7 @@ class GrandDerivedSignal(DerivedSignal):
     def __init__(self, derived_from, *, parent: Device, **kwargs):
         if isinstance(derived_from, str):
             derived_from = getattr(parent.parent, derived_from)
-        return super().__init__(derived_from, parent=parent, **kwargs)
+        super().__init__(derived_from, parent=parent, **kwargs)
 
 
 class CrystalChannel(GrandDerivedSignal):
@@ -83,7 +84,7 @@ def make_detector(
 def make_sample_rack(
     centers: np.typing.NDArray,
     heights: np.typing.NDArray,
-) -> Tuple[Device, Device, Device]:
+) -> tuple[Device, Device, Device]:
     x_mtr = SynAxis(name="x")
     y_mtr = SynAxis(name="y")
     N = len(centers)
