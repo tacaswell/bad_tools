@@ -120,7 +120,6 @@ lint.select = [
   "RET",         # flake8-return
   "RUF",         # Ruff-specific
   "SIM",         # flake8-simplify
-  "T20",         # flake8-print
   "UP",          # pyupgrade
   "YTT",         # flake8-2020
   "EXE",         # flake8-executable
