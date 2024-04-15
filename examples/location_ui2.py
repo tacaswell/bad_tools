@@ -7,10 +7,12 @@ from bluesky.callbacks.best_effort import BestEffortCallback
 
 from bad_tools.sim import make_sample_rack
 
+rng = np.random.default_rng(12345)
+
 bec = BestEffortCallback()
 bec.disable_table()
 
-x, y, det = make_sample_rack(3 * np.random.randn(15) + 13, 5)
+x, y, det = make_sample_rack(3 * rng.normal(size=15) + 13, 5)
 
 det.kind = "hinted"
 
