@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Any
 
@@ -10,18 +8,24 @@ from matplotlib.text import Annotation
 
 @dataclass
 class Sample:
+    """A sample."""
+
     name: str
     metadata: dict[str, Any]
 
 
 @dataclass
 class LocRange:
+    """The extent of the sample in motor space."""
+
     center: float
     width: float
 
 
 @dataclass
 class SampleLocation:
+    """Sample metadata and location."""
+
     sample: Sample
     x: LocRange
     y: LocRange
@@ -29,16 +33,31 @@ class SampleLocation:
 
 @dataclass
 class BboxView:
+    """Merged box and annotation 'artist'."""
+
     rect: Rectangle
     label: Annotation
 
 
 @dataclass
 class SampleViz:
+    """Helper to show found sample locations."""
+
     location: SampleLocation
     artists: BboxView | None = None
 
     def show_box(self, ax, callback=None):
+        """
+        Show the bounding box where the sample was found.
+
+        Parameters
+        ----------
+        ax : Axes
+            The axes to plot to.
+        callback : Sample
+           Callback to be passed the Sample when clicked.
+
+        """
         xy = (
             self.location.x.center - self.location.x.width / 2,
             self.location.y.center - self.location.y.width / 2,

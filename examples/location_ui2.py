@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import bluesky.plans as bp
 import numpy as np
 from bluesky import RunEngine

@@ -80,7 +80,7 @@ port.exclude_lines = [
 
 [tool.mypy]
 files = ["src", "tests"]
-python_version = "3.10"
+python_version = "3.12"
 warn_unused_configs = true
 strict = false
 show_error_codes = true
@@ -129,6 +129,7 @@ lint.select = [
 lint.extend-ignore = [
   "PLR",    # Design related pylint codes
   "E501",   # Line too long
+  "ISC001", # implicit concat
 ]
 src = ["src"]
 lint.unfixable = [
@@ -137,24 +138,10 @@ lint.unfixable = [
 ]
 exclude = []
 lint.flake8-unused-arguments.ignore-variadic-names = true
-lint.isort.required-imports = ["from __future__ import annotations"]
+lint.isort.required-imports = []
 # Uncomment if using a _compat.typing backport
 # typing-modules = ["bad_tools._compat.typing"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20"]
 "noxfile.py" = ["T20"]
-
-
-[tool.pylint]
-py-version = "3.10"
-ignore-paths = [".*/_version.py"]
-reports.output-format = "colorized"
-similarities.ignore-imports = "yes"
-messages_control.disable = [
-  "design",
-  "fixme",
-  "line-too-long",
-  "missing-module-docstring",
-  "wrong-import-position",
-]

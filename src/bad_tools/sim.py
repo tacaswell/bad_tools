@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from collections.abc import Callable, Sequence
 
 import numpy as np
@@ -22,6 +20,10 @@ class GrandDerivedSignal(DerivedSignal):
 
 
 class CrystalChannel(GrandDerivedSignal):
+    """
+    A single channel of a diffractometer.
+    """
+
     def __init__(self, derived_from, *, write_access=False, **kwargs):
         super().__init__(derived_from, write_access=write_access, **kwargs)
 
@@ -34,29 +36,49 @@ class CrystalChannel(GrandDerivedSignal):
 
 
 class Crystal(Device):
-    """
-    A class to simulate a single analyzer crystal on the BAD detectors.
-    """
+    """A class to simulate a single analyzer crystal on the BAD detectors."""
 
     offset = _Cpt(Signal, kind="config")
     value = _Cpt(CrystalChannel, "angle", kind="hinted", lazy=True, name="")
     missalign = _Cpt(Signal, kind="config", value=0.5)
 
     def __init__(self, *args, offset, **kwargs):
+        """
+        Parameters
+        ----------
+        offset : float
+            The offset of this crystal relative to zero on the tth arm.
+        """
         super().__init__(*args, **kwargs)
         self.offset.set(offset)
         self.value.name = self.name
 
 
 class DetectorBase(Device):
+    """The base detector."""
+
     angle = _Cpt(Signal, kind="hinted", value=0)
 
-    def __init__(self, *args, func, **kwargs):
+    def __init__(self, *args, func: Callable[[float], float], **kwargs):
+        """
+        Parameters
+        ----------
+        func :  Callable[[float], float]
+            The function (spectrum) that the detector is simulating.
+
+        """
         self._func = func
         super().__init__(*args, **kwargs)
 
     @property
     def channels(self):
+        """
+        List of crystals on detector.
+
+        Returns
+        -------
+        List[Crystal]
+        """
         return [
             getattr(self, k)
             for k in sorted(self.component_names)
@@ -70,6 +92,17 @@ def make_detector(
     *,
     name: str = "det",
 ) -> Device:
+    """
+    Make a simulated detector.
+
+    Parameters
+    ----------
+    angle_offsets : Sequence[float],
+        The offset of each crystal.
+
+    func : Callable[[float], float],
+        The function (spectrum) that the detector is simulating.
+    """
     cls = type(
         "BADSimDetector",
         (DetectorBase,),

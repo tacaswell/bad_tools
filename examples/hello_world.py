@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import bluesky.plans as bp
 import matplotlib.pyplot as plt
 import numpy as np
