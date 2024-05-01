@@ -157,7 +157,7 @@
       # ax.set_title(f'{det!r}')
 
 
-  def plot_layout(det, *, ax=None):
+  def plot_layout(det, *, ax=None, target=100):
       if ax is None:
           fig, ax = plt.subplots(layout="constrained", figsize=(4, 3))
       ax.set_aspect("equal")
@@ -168,7 +168,7 @@
       wedge_kwargs = {"center": (0, 0), "r": 0.9, "width": 0.5, "alpha": 0.5}
       cmap = matplotlib.colormaps["tab10"]
 
-      target = 100
+
       min_range = min_to_theta(det, target)
       target_time = 30
       A = 1e-4
@@ -279,20 +279,20 @@
 #+begin_src python
   layouts = [
       Primary(Bank(13, 2), 1, 0),
-      Primary(Bank(13, 2), 3, 33),
-      Primary(Bank(4, 2), 7, 14.5),
-      Primary(Bank(34, 3), 1, 0),
+      Primary(Bank(13, 2), 4, 33),
+      Primary(Bank(4, 2), 9, 14.5),
+      Primary(Bank(44, 3), 1, 0),
   ]
 #+end_src
 
 ** 4 panel
 #+begin_src python
-  outer_fig = plt.figure(layout="constrained", figsize=(7, 7))
-  fig_arr = outer_fig.subfigures(2, 2, hspace=0, wspace=0)
+  outer_fig = plt.figure(layout="constrained", figsize=(12, 3))
+  fig_arr = outer_fig.subfigures(1, 4, hspace=0, wspace=0)
 
   for fig, det, label in zip(fig_arr.flat, layouts, "ABCD"):
       ax = fig.subplots()
-      plot_layout(det, ax=ax)
+      plot_layout(det, ax=ax, target=130)
       fig.patch.set_linewidth(2)
       fig.patch.set_edgecolor("k")
       ax.annotate(
